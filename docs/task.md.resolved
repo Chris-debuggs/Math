@@ -1,0 +1,36 @@
+# MA3151 CAS Tutoring Engine – Task Checklist
+
+## Planning
+- [x] Understand user requirements and architecture
+- [/] Write implementation plan and get user approval
+
+## Project Scaffold
+- [ ] Create project directory structure under `c:\Users\cnevi\Documents\Math`
+- [ ] Create `requirements.txt` (sympy, streamlit)
+
+## Problem Generators (generators/)
+- [ ] `eigen_generator.py` – A = PDP⁻¹ with distinct integer eigenvalues
+- [ ] `calculus_generator.py` – clean polynomial/rational function problems
+
+## Solver Modules (solvers/)
+- [ ] `eigen_solver.py` – characteristic polynomial → eigenvalues → eigenvectors
+- [ ] `cayley_hamilton_solver.py` – verify CH theorem, compute inverse
+- [ ] `quadratic_form_solver.py` – orthogonal reduction to canonical form
+- [ ] `limit_continuity_solver.py` – L'Hôpital's rule steps
+- [ ] `partial_derivative_solver.py` – Euler's theorem verification
+- [ ] `jacobian_solver.py` – Jacobian matrix & functional dependence
+- [ ] `taylor_maclaurin_solver.py` – multivariable Taylor/Maclaurin expansion
+- [ ] `maxima_minima_solver.py` – critical points + Lagrange multipliers
+- [ ] `definite_integral_solver.py` – Leibniz rule differentiation under integral
+- [ ] `multiple_integral_solver.py` – double/triple integral evaluation
+- [ ] `variable_change_solver.py` – Cartesian ↔ polar/spherical change of variables
+- [ ] `linear_ode_solver.py` – 2nd-order constant-coefficient ODE
+
+## UI Layer
+- [ ] `app.py` – main Streamlit app with session-state machine + topic selector
+
+## Verification
+- [ ] Verify all generators produce clean integer/rational outputs
+- [ ] Verify each solver returns a renderable AST list
+- [ ] Run `streamlit run app.py` and test step-through UI for each topic
+- [ ] Test "New Problem" and "Next Step" buttons preserve state correctly
