@@ -1,0 +1,197 @@
+# MA3151 Deterministic CAS Tutoring Engine
+
+A pure **SymPy**-powered, **Streamlit**-fronted tutoring tool for the MA3151
+Matrices and Calculus syllabus.  Every solver is a deterministic rewrite system;
+no neural models are involved.  Practice problems are procedurally generated so
+that solutions always have clean integer or simple rational answers.
+
+---
+
+## Proposed Changes
+
+### Project Root — `c:\Users\cnevi\Documents\Math\`
+
+```
+Math/
+├── app.py                  # Streamlit UI + session-state machine
+├── requirements.txt        # sympy, streamlit
+├── generators/
+│   ├── __init__.py
+│   ├── eigen_generator.py         # A = PDP⁻¹ trick
+│   └── calculus_generator.py      # polynomial / rational function problems
+└── solvers/
+    ├── __init__.py
+    ├── eigen_solver.py
+    ├── cayley_hamilton_solver.py
+    ├── quadratic_form_solver.py
+    ├── limit_continuity_solver.py
+    ├── partial_derivative_solver.py
+    ├── jacobian_solver.py
+    ├── taylor_maclaurin_solver.py
+    ├── maxima_minima_solver.py
+    ├── definite_integral_solver.py
+    ├── multiple_integral_solver.py
+    ├── variable_change_solver.py
+    └── linear_ode_solver.py
+```
+
+---
+
+### [NEW] `requirements.txt`
+Two runtime dependencies only: `sympy` and `streamlit`.
+
+---
+
+### [NEW] `generators/eigen_generator.py`
+Implements `generate_clean_eigen_problem(dim)`.
+- Picks **distinct** eigenvalues via `random.sample(range(-5,6), dim)` to avoid
+  defective-matrix edge cases.
+- Builds lower-triangular unimodular P (det = 1) so A = PDP⁻¹ has integer
+  entries.
+- Returns `{"topic": "eigenvalues", "matrix": A, "expected_roots": eigenvals}`.
+
+### [NEW] `generators/calculus_generator.py`
+Generates clean single-variable and two-variable polynomial problems for the
+calculus solvers (limits, partial derivatives, Jacobians, Taylor, ODE, integrals).
+All coefficients are small integers; answers are always rational.
+
+---
+
+### [NEW] `solvers/eigen_solver.py`
+Returns AST list for eigenvalue/eigenvector walkthrough:
+1. Display matrix A
+2. Form characteristic polynomial det(A − λI) = 0  
+3. Expand and factor  
+4. List eigenvalues λ₁, λ₂, …  
+5. For each λᵢ: row-reduce (A − λᵢI), display eigenvector
+
+### [NEW] `solvers/cayley_hamilton_solver.py`
+1. Compute characteristic polynomial p(λ)  
+2. Substitute A into p(A) and verify = 0 (Cayley–Hamilton)  
+3. Express A⁻¹ from the CH relation
+
+### [NEW] `solvers/quadratic_form_solver.py`
+1. Express quadratic form as xᵀAx, display symmetric A  
+2. Find eigenvalues/eigenvectors of A  
+3. Construct orthogonal modal matrix P  
+4. Show canonical form Σ λᵢyᵢ² under substitution x = Py  
+5. Classify (positive/negative/indefinite)
+
+### [NEW] `solvers/limit_continuity_solver.py`
+1. Display the limit expression  
+2. Check direct substitution; if 0/0 or ∞/∞ apply L'Hôpital  
+3. Show differentiated numerator/denominator step  
+4. Evaluate final limit
+
+### [NEW] `solvers/partial_derivative_solver.py`
+1. Display f(x, y)  
+2. Compute ∂f/∂x, ∂f/∂y  
+3. Verify Euler's theorem: x·fₓ + y·fₓ = n·f (for homogeneous functions)
+
+### [NEW] `solvers/jacobian_solver.py`
+1. Display the function vector (u, v) = F(x, y)  
+2. Compute the 2×2 Jacobian matrix J = ∂(u,v)/∂(x,y)  
+3. Evaluate det(J); if det(J) = 0 state functional dependence
+
+### [NEW] `solvers/taylor_maclaurin_solver.py`
+1. Display f(x, y) and expansion point  
+2. Compute partial derivatives up to order 2 (or 3)  
+3. Show Taylor series assembled term-by-term
+
+### [NEW] `solvers/maxima_minima_solver.py`
+1. Compute fₓ = 0, fᵧ = 0 → critical points  
+2. Compute second-order partials A = fₓₓ, B = fₓᵧ, C = fᵧᵧ  
+3. Evaluate Δ = AC − B²; classify each critical point  
+4. *(Lagrange variant)* Set up ∇f = λ∇g and solve
+
+### [NEW] `solvers/definite_integral_solver.py`
+1. Display I(t) = ∫ f(x,t) dx  
+2. Apply Leibniz rule: dI/dt = ∫ ∂f/∂t dx  
+3. Evaluate the resulting integral/derivative
+
+### [NEW] `solvers/multiple_integral_solver.py`
+1. Display the iterated integral with limits  
+2. Evaluate inner integral (show antiderivative + substitution of limits)  
+3. Evaluate outer integral → scalar result
+
+### [NEW] `solvers/variable_change_solver.py`
+1. Display Cartesian integrand and region  
+2. Apply x = r cos θ, y = r sin θ; show Jacobian |J| = r  
+3. Rewrite integral in polar/spherical form  
+4. Evaluate
+
+### [NEW] `solvers/linear_ode_solver.py`
+1. Display ay″ + by′ + cy = g(x)  
+2. Solve auxiliary equation am² + bm + c = 0, classify roots  
+3. Write complementary function yc  
+4. Find particular integral yp (method of undetermined coefficients)  
+5. Write general solution y = yc + yp
+
+---
+
+### [NEW] `app.py` — Streamlit UI
+
+Single-file application (~300 lines).
+
+**Topic selector** – sidebar `st.selectbox` covering all 12 solver topics.
+
+**Session-state machine** (persists across reruns):
+```
+st.session_state:
+  topic        – currently selected topic string
+  step         – integer index into solution_ast
+  active_problem – dict returned by generator
+  solution_ast   – list of AST nodes [{type, value, label}, …]
+```
+
+**AST node types rendered**:
+| type | rendering |
+|---|---|
+| `"text"` | `st.markdown(label)` |
+| `"latex"` | `st.latex(value)` |
+| `"matrix"` | `st.latex(sp.latex(value))` |
+| `"polynomial"` | `st.latex(sp.latex(value) + " = 0")` |
+| `"solution"` | `st.latex(r"\lambda = " + sp.latex(value))` |
+| `"equation"` | `st.latex(sp.latex(value))` |
+
+**Controls**: `Next Step` / `Previous Step` / `Show All` / `New Problem` buttons.
+
+---
+
+## Verification Plan
+
+### Automated – generator smoke test (run from `Math/`)
+```
+python -c "
+from generators.eigen_generator import generate_clean_eigen_problem
+import sympy as sp
+for _ in range(20):
+    p = generate_clean_eigen_problem(2)
+    A = p['matrix']
+    roots = sp.Matrix(A).eigenvals()
+    assert all(isinstance(r, sp.Integer) for r in roots), 'Non-integer root!'
+print('All 20 problems passed.')
+"
+```
+
+### Automated – each solver returns a non-empty renderable list
+```
+python -c "
+from generators.eigen_generator import generate_clean_eigen_problem
+from solvers.eigen_solver import eigen_steps
+prob = generate_clean_eigen_problem(2)
+ast = eigen_steps(prob['matrix'])
+assert isinstance(ast, list) and len(ast) > 0
+assert all('type' in node and 'value' in node for node in ast)
+print('eigen_solver OK, steps:', len(ast))
+"
+```
+(Repeat for every solver.)
+
+### Manual – Streamlit UI
+1. Run `streamlit run app.py` from `c:\Users\cnevi\Documents\Math\`.
+2. Open the browser URL shown in the terminal (default `http://localhost:8501`).
+3. For each topic in the sidebar: click **New Problem**, click **Next Step**
+   repeatedly to verify each step renders without error, then click **Show All**.
+4. Verify the step counter never exceeds the total number of AST nodes.
+5. Confirm **New Problem** regenerates a different matrix/expression.
