@@ -1,0 +1,2 @@
+sympy>=1.12
+streamlit>=1.32
