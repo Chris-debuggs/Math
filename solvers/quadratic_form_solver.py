@@ -10,6 +10,9 @@ def quadratic_form_steps(A: sp.Matrix) -> list:
     A must be a real symmetric matrix.
     Returns AST steps: display A, eigenvalues, modal matrix P, canonical form.
     """
+    if isinstance(A, dict):
+        A = A["matrix"]
+
     n = A.shape[0]
     lam = sp.Symbol(r"\lambda")
     steps = []
