@@ -6,6 +6,9 @@ import sympy as sp
 
 
 def cayley_hamilton_steps(A: sp.Matrix) -> list:
+    if isinstance(A, dict):
+        A = A["matrix"]
+
     n = A.shape[0]
     lam = sp.Symbol(r"\lambda")
     steps = []
@@ -30,7 +33,9 @@ def cayley_hamilton_steps(A: sp.Matrix) -> list:
     # Substitute A into p(λ) — Cayley-Hamilton: p(A) = 0
     # Build p(A) symbolically then simplify
     coeffs = sp.Poly(char_poly_expanded, lam).all_coeffs()
-    pA = sum(c * A**i for i, c in enumerate(reversed(coeffs)))
+    pA = sp.zeros(n)
+    for i, c in enumerate(reversed(coeffs)):
+        pA += c * (A ** i)
     pA_simplified = sp.simplify(pA)
     steps.append({
         "type": "text",

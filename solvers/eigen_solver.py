@@ -16,6 +16,9 @@ def eigen_steps(A: sp.Matrix) -> list:
     -------
     list of dicts with keys: type, label, value, hint
     """
+    if isinstance(A, dict):
+        A = A["matrix"]
+
     n = A.shape[0]
     lam = sp.Symbol(r"\lambda")
     steps = []

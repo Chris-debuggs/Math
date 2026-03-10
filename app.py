@@ -105,7 +105,11 @@ def _load_problem(topic_key: str):
     """Generate a new problem for the given topic and populate session state."""
     display_name, unit, gen_fn, solver_fn, gen_kwargs = TOPICS[topic_key]
     prob = gen_fn(**gen_kwargs)
-    ast = solver_fn(prob)
+    # Matrix-centric solvers consume prob["matrix"], while the others consume prob.
+    if solver_fn in (eigen_steps, cayley_hamilton_steps, quadratic_form_steps):
+        ast = solver_fn(prob["matrix"])
+    else:
+        ast = solver_fn(prob)
     st.session_state.update({
         "topic": topic_key,
         "step": 0,
