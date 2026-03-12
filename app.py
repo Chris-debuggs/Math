@@ -37,6 +37,15 @@ from solvers.definite_integral_solver import definite_integral_steps
 from solvers.multiple_integral_solver import multiple_integral_steps
 from solvers.variable_change_solver import variable_change_steps
 from solvers.linear_ode_solver import linear_ode_steps
+from content.concept_cards import get_topic_card, get_foundation_cards
+
+VISUALIZER_AVAILABLE = True
+try:
+    from visualizers.plots import plot_linear_transformation_2d, plot_maxima_surface
+except ModuleNotFoundError:
+    VISUALIZER_AVAILABLE = False
+    plot_linear_transformation_2d = None
+    plot_maxima_surface = None
 
 # ─── Topic registry ──────────────────────────────────────────────────────────
 # Each entry: (display_name, unit_label, generator_fn, solver_fn, generator_kwargs)
@@ -97,6 +106,7 @@ TOPICS = {
 }
 
 TOPIC_KEYS = list(TOPICS.keys())
+MATRIX_VISUAL_TOPICS = {"eigenvalues", "eigenvalues_3x3", "cayley_hamilton", "quadratic_form"}
 
 
 # ─── Session-state initialisation ────────────────────────────────────────────
@@ -127,6 +137,47 @@ def _init_session(topic_key: str):
         for k, v in [("step", 0), ("show_all", False)]:
             if k not in st.session_state:
                 st.session_state[k] = v
+
+
+def _render_concept_card(topic_key: str):
+    """Render compact concept notes for the selected topic."""
+    card = get_topic_card(topic_key)
+    if not card:
+        return
+
+    with st.expander("Concept Card", expanded=True):
+        st.markdown(f"**{card['title']}**")
+        st.caption(str(card["syllabus"]))
+        st.markdown(str(card["core_idea"]))
+        st.markdown("**Exam checklist**")
+        for item in card["exam_checklist"]:
+            st.markdown(f"- {item}")
+        st.markdown(f"**Tech link:** {card['tech_link']}")
+
+        related = get_foundation_cards(topic_key)
+        if related:
+            st.markdown("**Related theory prompts**")
+            for node in related:
+                st.markdown(f"- **{node['name']}**: {node['prompt']}")
+
+
+def _render_visual(topic_key: str, active_problem: dict):
+    """Render an optional geometric visual for selected topics."""
+    if topic_key in MATRIX_VISUAL_TOPICS:
+        A = active_problem["matrix"]
+        if A.shape != (2, 2):
+            st.caption("Visualization currently supports 2x2 matrix transformations.")
+            return True
+        fig = plot_linear_transformation_2d(A)
+        st.pyplot(fig, use_container_width=True)
+        return True
+
+    if topic_key == "maxima_minima":
+        fig = plot_maxima_surface(active_problem["function"], active_problem["variables"])
+        st.pyplot(fig, use_container_width=True)
+        return True
+
+    return False
 
 
 # ─── AST renderer ────────────────────────────────────────────────────────────
@@ -310,6 +361,14 @@ with st.sidebar:
     st.markdown("### Options")
     hint_mode = st.toggle("🔦 Hint Mode", value=False,
                           help="Show a pedagogical hint below each step.")
+    show_concepts = st.toggle("Concept Cards", value=True)
+    show_visuals = st.toggle(
+        "Visualize",
+        value=VISUALIZER_AVAILABLE,
+        disabled=not VISUALIZER_AVAILABLE,
+    )
+    if not VISUALIZER_AVAILABLE:
+        st.caption("Install matplotlib to enable visualizations.")
     matrix_dim = None
     if selected_topic in ("eigenvalues", "cayley_hamilton"):
         matrix_dim = st.radio("Matrix dim", [2, 3], horizontal=True)
@@ -354,6 +413,18 @@ st.markdown(
 )
 
 # ─── Step renderer ───────────────────────────────────────────────────────────
+
+if show_concepts:
+    _render_concept_card(selected_topic)
+
+if VISUALIZER_AVAILABLE and show_visuals and (
+    selected_topic in MATRIX_VISUAL_TOPICS or selected_topic == "maxima_minima"
+):
+    st.markdown("### Visual Intuition")
+    try:
+        _render_visual(selected_topic, st.session_state.active_problem)
+    except Exception as exc:
+        st.warning(f"Visualization unavailable for this problem: {exc}")
 
 if show_all:
     steps_to_show = range(total_steps)
