@@ -207,7 +207,10 @@ def _render_node(node: dict, show_hint: bool = False):
     elif node_type == "latex":
         st.latex(str(val))
     elif node_type == "text":
-        st.latex(str(val)) if val and val.strip().startswith("\\") else st.markdown(str(val))
+        if val and val.strip().startswith("\\"):
+            st.latex(str(val))
+        else:
+            st.markdown(str(val))
     elif node_type == "equation":
         st.latex(sp.latex(val))
 
