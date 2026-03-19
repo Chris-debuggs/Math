@@ -86,12 +86,12 @@ Returns AST list for eigenvalue/eigenvector walkthrough:
 ### [NEW] `solvers/partial_derivative_solver.py`
 1. Display f(x, y)  
 2. Compute ∂f/∂x, ∂f/∂y  
-3. Verify Euler's theorem: x·fₓ + y·fₓ = n·f (for homogeneous functions)
+3. Verify Euler's theorem: x·fₓ + y·fᵧ = n·f (for homogeneous functions)
 
 ### [NEW] `solvers/jacobian_solver.py`
 1. Display the function vector (u, v) = F(x, y)  
 2. Compute the 2×2 Jacobian matrix J = ∂(u,v)/∂(x,y)  
-3. Evaluate det(J); if det(J) = 0 state functional dependence
+3. Evaluate det(J); if det(J) = 0, flag possible functional dependence / loss of local invertibility
 
 ### [NEW] `solvers/taylor_maclaurin_solver.py`
 1. Display f(x, y) and expansion point  
@@ -105,8 +105,8 @@ Returns AST list for eigenvalue/eigenvector walkthrough:
 4. *(Lagrange variant)* Set up ∇f = λ∇g and solve
 
 ### [NEW] `solvers/definite_integral_solver.py`
-1. Display I(t) = ∫ f(x,t) dx  
-2. Apply Leibniz rule: dI/dt = ∫ ∂f/∂t dx  
+1. Display I(t) = ∫₀ᵗ f(x) dx  
+2. Apply the Leibniz rule / Fundamental Theorem with a moving upper limit  
 3. Evaluate the resulting integral/derivative
 
 ### [NEW] `solvers/multiple_integral_solver.py`
