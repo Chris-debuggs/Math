@@ -169,12 +169,12 @@ def _render_visual(topic_key: str, active_problem: dict):
             st.caption("Visualization currently supports 2x2 matrix transformations.")
             return True
         fig = plot_linear_transformation_2d(A)
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width="stretch")
         return True
 
     if topic_key == "maxima_minima":
         fig = plot_maxima_surface(active_problem["function"], active_problem["variables"])
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width="stretch")
         return True
 
     return False
@@ -445,26 +445,26 @@ col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
 with col1:
     if st.button("⬅ Previous", disabled=(current_step == 0 or show_all),
-                 use_container_width=True):
+                 width="stretch"):
         st.session_state.step -= 1
         st.session_state.show_all = False
         st.rerun()
 
 with col2:
     if st.button("Next Step ➡", disabled=(current_step >= total_steps - 1 or show_all),
-                 use_container_width=True):
+                 width="stretch"):
         st.session_state.step += 1
         st.rerun()
 
 with col3:
     label = "☰ Collapse" if show_all else "☰ Show All"
-    if st.button(label, use_container_width=True):
+    if st.button(label, width="stretch"):
         st.session_state.show_all = not show_all
         if not show_all:
             st.session_state.step = total_steps - 1
         st.rerun()
 
 with col4:
-    if st.button("🔀 New Problem", type="primary", use_container_width=True):
+    if st.button("🔀 New Problem", type="primary", width="stretch"):
         _load_problem(selected_topic)
         st.rerun()
