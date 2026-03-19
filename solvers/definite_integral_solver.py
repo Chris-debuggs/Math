@@ -1,6 +1,7 @@
 """
 solvers/definite_integral_solver.py
-Evaluates I(t) = ∫_{lower}^{upper} f(x,t) dx and demonstrates Leibniz rule.
+Evaluates I(t) = integral_0^t f(x) dx and demonstrates the Fundamental Theorem
+of Calculus / Leibniz rule.
 """
 import sympy as sp
 
@@ -18,27 +19,36 @@ def definite_integral_steps(prob: dict) -> list:
 
     steps.append({
         "type": "latex",
-        "label": r"**Evaluate** $I(t) = \int_{\alpha}^{\beta} f(x,t)\, dx$ **and find** $I'(t)$:",
+        "label": r"**Evaluate** $I(t) = \int_{" + sp.latex(lower) + r"}^{" + sp.latex(upper) + r"} f(x)\, dx$ **and find** $I'(t)$:",
         "value": r"I(t) = \int_{" + sp.latex(lower) + r"}^{" + sp.latex(upper) +
                  r"} \left(" + sp.latex(integrand) + r"\right)\, dx",
-        "hint": "Write down the integral I(t) whose derivative we want to find using Leibniz rule.",
+        "hint": "Write down the definite integral I(t) with the moving upper limit.",
     })
 
-    # Leibniz rule: dI/dt = d/dt ∫ f dx = ∫ ∂f/∂t dx  (for constant limits wrt t)
+    # Leibniz rule with a moving upper limit.
     df_dt = sp.diff(integrand, t)
+    boundary_term = sp.simplify(integrand.subs(x, upper) * sp.diff(upper, t))
+    integral_term = sp.integrate(df_dt, (x, lower, upper))
+    leibniz_rhs = sp.simplify(boundary_term + integral_term)
     steps.append({
         "type": "latex",
-        "label": r"**Leibniz Rule:** $I'(t) = \int \frac{\partial f}{\partial t}\, dx$",
-        "value": r"\frac{d}{dt}\left[" + sp.latex(integrand) + r"\right] = " + sp.latex(df_dt),
-        "hint": "Differentiate f(x,t) partially with respect to t (treating x as a constant).",
+        "label": r"**Leibniz rule / Fundamental Theorem:**",
+        "value": (
+            r"\frac{d}{dt}\left[\int_{"
+            + sp.latex(lower)
+            + r"}^{"
+            + sp.latex(upper)
+            + r"} f(x)\, dx\right] = "
+            + sp.latex(leibniz_rhs)
+        ),
+        "hint": "Account for the upper-limit term and any explicit t-dependence in the integrand.",
     })
 
     steps.append({
         "type": "latex",
         "label": r"**Therefore:**",
-        "value": r"I'(t) = \int_{" + sp.latex(lower) + r"}^{" + sp.latex(upper) +
-                 r"} \left(" + sp.latex(df_dt) + r"\right)\, dx",
-        "hint": "Place the differentiated integrand back under the integral sign.",
+        "value": r"I'(t) = " + sp.latex(leibniz_rhs),
+        "hint": "The derivative is the simplified Leibniz result.",
     })
 
     # Evaluate I(t) directly
