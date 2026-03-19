@@ -73,11 +73,11 @@ TOPIC_CONCEPTS: Dict[str, TopicCard] = {
     "jacobian": {
         "title": "Jacobian and Functional Dependence",
         "syllabus": "20MA203 - Differential Calculus",
-        "core_idea": "The Jacobian determinant tracks local area scaling and invertibility behavior.",
+        "core_idea": "The Jacobian determinant tracks local area scaling; a nonzero determinant indicates local invertibility.",
         "exam_checklist": [
             "Build Jacobian matrix from first partial derivatives",
             "Compute determinant and simplify",
-            "Use determinant test for dependence/independence",
+            "Use determinant test for local invertibility or possible dependence",
             "Use Jacobian in coordinate substitutions for integrals",
         ],
         "tech_link": "Used in coordinate transforms, robotics kinematics, and generative models.",
@@ -161,4 +161,3 @@ def get_foundation_cards(topic_key: str) -> List[FoundationCard]:
     """Return lightweight theory cards related to a computational topic."""
     keys = TOPIC_TO_FOUNDATIONS.get(topic_key, [])
     return [FOUNDATION_CARDS[k] for k in keys if k in FOUNDATION_CARDS]
-

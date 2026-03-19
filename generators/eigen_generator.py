@@ -2,7 +2,7 @@
 generators/eigen_generator.py
 Generates eigenvalue problems A = P D P^{-1} with distinct integer eigenvalues.
 The unimodular matrix P (det=1) guarantees integer entries in A.
-Supports 2×2 and 3×3 matrices.
+Supports 2x2 and 3x3 matrices.
 """
 import random
 import sympy as sp
@@ -25,7 +25,7 @@ def generate_clean_eigen_problem(dim: int = 2) -> dict:
         for j in range(i):
             P[i, j] = random.randint(-2, 2)
 
-    # A = P D P^{-1}  — integer entries because det(P) = 1
+    # A = P D P^{-1}  - integer entries because det(P) = 1
     A = P * D * P.inv()
 
     return {
@@ -45,26 +45,28 @@ def generate_cayley_hamilton_problem(dim: int = 2) -> dict:
 
 def generate_quadratic_form_problem() -> dict:
     """
-    Generate a 2×2 or 3×3 real symmetric matrix suitable for quadratic form
-    reduction.  Built as A = P D P^T where P is orthogonal (approx) — we use
-    the eigen-construction trick and then symmetrise to keep integer entries.
+    Generate a 2x2 or 3x3 real symmetric matrix suitable for quadratic form
+    reduction. Built as A = Q^T D Q with an integer matrix Q and diagonal D.
     """
     dim = random.choice([2, 3])
     eigenvals = random.sample(range(-4, 6), dim)
     D = sp.diag(*eigenvals)
 
-    # Simple symmetric-friendly integer matrix via S = L + L^T + D_shifted
-    # Easier: just pick a symmetric matrix with known-clean determinant.
-    # We construct A = Q^T D Q where Q is an integer matrix with det=±1.
+    # Simple symmetric-friendly integer matrix via A = Q^T D Q.
     Q = sp.eye(dim)
     for i in range(1, dim):
         for j in range(i):
             Q[i, j] = random.randint(-1, 1)
     A = Q.T * D * Q   # symmetric by construction since D is diagonal
 
+    actual_eigenvals = sorted(
+        A.eigenvals().keys(),
+        key=lambda v: float(sp.N(v)),
+    )
+
     return {
         "topic": "quadratic_form",
         "matrix": A,
         "dim": dim,
-        "expected_eigenvals": sorted(eigenvals),
+        "expected_eigenvals": actual_eigenvals,
     }

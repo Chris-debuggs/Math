@@ -29,9 +29,12 @@ def _rand_coeff(lo: int = -4, hi: int = 4) -> int:
 
 def generate_limit_problem() -> dict:
     """
-    Generates a 0/0 indeterminate limit at x=a suitable for L'Hôpital.
-    Form: (a·x² + b·x·(x-a)) / ((x-a)·(c·x + d))
-    simplified to ensure limit at x=a is finite.
+    Generates a 0/0 indeterminate limit suitable for simplification or
+    L'Hopital's rule.
+
+    Cases produced:
+    - sin(b*x)/(c*x) as x -> 0
+    - (x^2 - a^2)/(x - a) as x -> a
     """
     a = _rand_coeff(1, 4)
     b = _rand_coeff(1, 3)
@@ -135,8 +138,8 @@ def generate_taylor_problem() -> dict:
 
 def generate_maxima_minima_problem() -> dict:
     """
-    f(x,y) = a·x³ + b·y³ + c·x + d·y + e·x·y  with real critical points.
-    We choose coefficients that guarantee the discriminant test is decisive.
+    Generates f(x, y) = x^3 + y^3 - 3*a*x - 3*b*y with real critical points.
+    This form gives clean second-derivative test classifications.
     """
     # Simple: f = x^3 + y^3 - 3*a*x - 3*b*y
     a = _rand(1, 3)
@@ -154,8 +157,9 @@ def generate_maxima_minima_problem() -> dict:
 
 def generate_definite_integral_problem() -> dict:
     """
-    I(t) = ∫₀^t  (a·x + b)·eˢˢ dx   — differentiable under the integral sign.
-    Uses Leibniz: I'(t) = integrand at upper limit.
+    I(t) = int_0^t (a*x + b)*e^x dx.
+    With moving upper limit and no explicit t in the integrand, I'(t)=f(t)
+    by the Fundamental Theorem of Calculus (Leibniz special case).
     """
     a = _rand_coeff(1, 3)
     b = _rand_coeff(1, 3)

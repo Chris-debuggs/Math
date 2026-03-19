@@ -1,6 +1,7 @@
 """
 solvers/jacobian_solver.py
-Computes the Jacobian matrix ∂(u,v)/∂(x,y) and checks for functional dependence.
+Computes the Jacobian matrix d(u,v)/d(x,y) and uses its determinant to assess
+local invertibility.
 """
 import sympy as sp
 
@@ -32,14 +33,14 @@ def jacobian_steps(prob: dict) -> list:
         "label": r"**Partial derivatives** of $u$:",
         "value": r"\frac{\partial u}{\partial x} = " + sp.latex(u_x) +
                  r",\quad \frac{\partial u}{\partial y} = " + sp.latex(u_y),
-        "hint": "Compute ∂u/∂x and ∂u/∂y.",
+        "hint": "Compute du/dx and du/dy.",
     })
     steps.append({
         "type": "latex",
         "label": r"**Partial derivatives** of $v$:",
         "value": r"\frac{\partial v}{\partial x} = " + sp.latex(v_x) +
                  r",\quad \frac{\partial v}{\partial y} = " + sp.latex(v_y),
-        "hint": "Compute ∂v/∂x and ∂v/∂y.",
+        "hint": "Compute dv/dx and dv/dy.",
     })
 
     # Jacobian matrix
@@ -48,7 +49,7 @@ def jacobian_steps(prob: dict) -> list:
         "type": "matrix",
         "label": r"**Jacobian matrix** $J = \frac{\partial(u,v)}{\partial(x,y)}$:",
         "value": J,
-        "hint": "Arrange the partial derivatives as a 2×2 matrix.",
+        "hint": "Arrange the partial derivatives as a 2x2 matrix.",
     })
 
     # Determinant
@@ -57,20 +58,25 @@ def jacobian_steps(prob: dict) -> list:
         "type": "latex",
         "label": r"**Jacobian determinant** $\det(J)$:",
         "value": r"\det(J) = " + sp.latex(det_J),
-        "hint": "Compute the determinant of J. If det(J) = 0, u and v are functionally dependent.",
+        "hint": "Compute the determinant of J. If det(J) = 0, the map is not locally invertible.",
     })
 
-    # Functional dependence
+    # Local invertibility / dependence
     if sp.simplify(det_J) == 0:
-        conclusion = r"\det(J) = 0 \Rightarrow u \text{ and } v \text{ are \textbf{functionally dependent}.}"
+        conclusion = (
+            r"\det(J) = 0 \Rightarrow \text{the map is not locally invertible, and "
+            r"functional dependence may be present.}"
+        )
     else:
-        conclusion = r"\det(J) \neq 0 \Rightarrow u \text{ and } v \text{ are \textbf{functionally independent}.}"
+        conclusion = (
+            r"\det(J) \neq 0 \Rightarrow \text{the functions are locally independent.}"
+        )
 
     steps.append({
         "type": "text",
         "label": "**Conclusion:**",
         "value": conclusion,
-        "hint": "A zero Jacobian determinant implies one function can be expressed in terms of the other.",
+        "hint": "A zero Jacobian determinant rules out local invertibility.",
     })
 
     return steps
