@@ -1,0 +1,27 @@
+[MESSAGES CONTROL]
+# Disable rules that are often too pedantic for scientific/math code
+disable=
+    C0114, # missing-module-docstring
+    C0115, # missing-class-docstring
+    C0116, # missing-function-docstring
+    R0903, # too-few-public-methods (common in solver classes)
+    R0913, # too-many-arguments (math functions often need many params)
+    C0103  # invalid-name (we will override this below instead)
+
+[FORMAT]
+# Increase line length for complex formulas
+max-line-length=120
+
+[BASIC]
+# Allow common mathematical single-letter variables
+good-names=i,j,k,n,x,y,z,df,dt,dx,ex,ok,_
+
+# Custom regex for variable names if you want to be specific
+# This allows names like 'x1', 'y_min', 'mu', etc.
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+
+[DESIGN]
+# Increase the number of arguments allowed for complex math functions
+max-args=10
+# Increase local variables allowed in a single function
+max-locals=20
